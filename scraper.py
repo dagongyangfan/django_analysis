@@ -11,8 +11,8 @@ if not TOKEN:
     TOKEN = input("👉 请手动输入 Token: ").strip()
 
 REPO_NAME = "django/django"   # 目标仓库
-MAX_ISSUES = 500              # 建议先设为 200，保证快速出结果
-CORE_LIMIT = 20               # 识别前 20 名核心成员
+MAX_ISSUES = 2000             # 采集数量扩大到 2000
+CORE_LIMIT = 20               # 前 20 个贡献者视为核心成员
 
 def save_to_csv(data_list):
     if not data_list:
@@ -36,54 +36,43 @@ def get_bug_data():
         print(f"❌ 连接失败: {e}")
         return []
 
-    # --- 2. 识别核心成员 ---
     print("🕵️  正在识别核心贡献者...")
     contributors = repo.get_contributors()
     core_members = [c.login for c in contributors[:CORE_LIMIT]]
     print(f"✅ 核心成员名单: {core_members}")
 
-    # --- 3. 抓取循环 ---
-    print(f"🚀 开始扫描 (将包含 PR 以获取有效修复数据)...")
-    
-    # 获取最近更新的已关闭记录
-    issues = repo.get_issues(state='closed', sort='updated', direction='desc')
+    print("🚀 开始扫描 issues（按创建时间 asc）...")
+    issues = repo.get_issues(state='closed', sort='created', direction='asc')
     
     bug_data = []
     scanned_count = 0
-    
+
     try:
         for issue in issues:
             scanned_count += 1
-            
-            # 心跳提示
-            if scanned_count % 50 == 0:
-                print(f"running... [扫描: {scanned_count} | 收集: {len(bug_data)}] ...")
+            if scanned_count % 100 == 0:
+                print(f"已扫描 {scanned_count} 条，已收集 {len(bug_data)} 条...")
 
             if len(bug_data) >= MAX_ISSUES:
                 break
-            
-            # --- Django 专属判定逻辑 ---
+
             title_lower = issue.title.lower()
             labels = [l.name.lower() for l in issue.labels]
-            
-            # 判断是否为修复类任务：标题含 fix/bug/regression 或标签含 bug
+
             is_fix = (
                 'fix' in title_lower or 
                 'bug' in title_lower or 
                 'fixed' in title_lower or
                 any('bug' in lab for lab in labels)
             )
-            
             if not is_fix:
-                continue 
+                continue
 
-            # 4. 提取数据
-            # 优先获取提交者 (PR 的作者)，如果没有则取关闭者
             fixer = issue.user.login if issue.user else "Unknown"
-            
             created = issue.created_at
             closed = issue.closed_at
-            if not closed: continue
+            if not closed:
+                continue
 
             duration = (closed - created).total_seconds() / 86400
 
@@ -99,10 +88,10 @@ def get_bug_data():
             })
 
     except KeyboardInterrupt:
-        print("\n🛑 手动停止，正在保存...")
+        print("🛑 手动中断，保存已有数据...")
     except RateLimitExceededException:
-        print("🛑 触发限速，请稍后再试或更换 Token。")
-    
+        print("🛑 触发 GitHub API 限速，请稍后重试或换 token。")
+
     return bug_data
 
 if __name__ == "__main__":
