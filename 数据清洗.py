@@ -81,11 +81,10 @@ def filter_django_bugs(input_file, output_file):
     return filtered_df
 
 
-# 使用示例
 if __name__ == "__main__":
-    # 输入输出文件路径
-    input_csv = "django_bugs_analysis.csv"
-    output_csv = "django_bugs_filtered.csv"
+    # 输入输出文件路径（修正为 data 文件夹）
+    input_csv = "data/django_bugs_analysis.csv"
+    output_csv = "data/django_bugs_filtered.csv"
 
     # 执行过滤
     filtered_data = filter_django_bugs(input_csv, output_csv)
