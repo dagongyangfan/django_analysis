@@ -1,0 +1,5 @@
+| Member Type | N | Duration_mean | Duration_median | Duration_Q1 | Duration_Q3 | Comments_mean | Comments_median | Comments_Q1 | Comments_Q3 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Community Contributor | 1410 | 45.09 | 2.3 | 0.21 | 31.58 | 2.71 | 1.0 | 1.0 | 3.0 |
+| Core Member | 192 | 16.74 | 2.99 | 0.71 | 13.42 | 2.41 | 1.0 | 1.0 | 3.0 |
+| Overall | 1602 | 41.69 | 2.35 | 0.26 | 26.26 | 2.67 | 1.0 | 1.0 | 3.0 |
